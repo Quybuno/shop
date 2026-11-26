@@ -2,6 +2,7 @@ package com.example.shop.exception;
 
 import com.example.shop.DTO.response.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -36,17 +37,18 @@ public class GlobalExceptionHandler {
                 .build();
         return ResponseEntity.badRequest().body(body);
     }
-    @ExceptionHandler(value = AppException.class)
-    public ResponseEntity<ErrorResponse> handleDateIntergrity(AppException exception,HttpServletRequest httpServletRequest){
-        ErrorCode errorCode = exception.getErrorCode();
+    @ExceptionHandler(value = DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException e,HttpServletRequest httpServletRequest){
+        ErrorCode errorCode = ErrorCode.DATA_CONFLICT;
+
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .status(errorCode.getStatus().value())
+                .status((errorCode.getStatus().value()))
                 .error(errorCode.getStatus().getReasonPhrase())
                 .message(errorCode.getMessage())
                 .path(httpServletRequest.getRequestURI())
                 .timestamp(LocalDateTime.now())
                 .build();
-        return ResponseEntity.status((errorCode.getStatus())).body(errorResponse);
+        return ResponseEntity.status(errorCode.getStatus()).body(errorResponse);
     }
 
 }
